@@ -1,8 +1,14 @@
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using mininal_api.Dominio.Interfaces;
+using mininal_api.Dominio.Servicos;
 using mininal_api.Dto;
 using mininal_api.Infraestutura.Db;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddScoped<IAdministradorServico, AdministradorServico>();
+
 builder.Services.AddDbContext<DbContexto>(options =>
 {
     options.UseMySql(builder.Configuration.GetConnectionString("mysql"),
@@ -12,9 +18,9 @@ builder.Services.AddDbContext<DbContexto>(options =>
 var app = builder.Build();
 
 
-app.MapPost("/login", (LoginDto loginDto) =>
+app.MapPost("/login", ([FromBody]LoginDto loginDto,IAdministradorServico administradorServico) =>
 {
-    if (loginDto.Email == "Valquirianatalia@gmail.com" && loginDto.Senha == "123456")
+    if (administradorServico.Login(loginDto)!= null)
     {
         return Results.Ok("Login com sucesso ");
     }
