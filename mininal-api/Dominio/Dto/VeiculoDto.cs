@@ -1,0 +1,13 @@
+namespace mininal_api.Dto;
+
+public record VeiculoDto
+{
+    
+    
+    
+     public string Nome { get; set; } = default;
+    
+     public string Marca { get; set; } = default;
+     
+     public int Ano { get; set; } = default;
+}

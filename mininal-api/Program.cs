@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using mininal_api.Dominio.Entidades;
 using mininal_api.Dominio.Interfaces;
+using mininal_api.Dominio.ModelViews;
 using mininal_api.Dominio.Servicos;
 using mininal_api.Dto;
 using mininal_api.Infraestutura.Db;
@@ -8,6 +10,10 @@ using mininal_api.Infraestutura.Db;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddScoped<IAdministradorServico, AdministradorServico>();
+builder.Services.AddScoped<IVeiculoServico, VeiculoServico>();
+
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<DbContexto>(options =>
 {
@@ -16,9 +22,10 @@ builder.Services.AddDbContext<DbContexto>(options =>
 });
 
 var app = builder.Build();
+app.MapGet("/", () =>Results.Json(new Home()));
 
 
-app.MapPost("/login", ([FromBody]LoginDto loginDto,IAdministradorServico administradorServico) =>
+app.MapPost("/administradores/login", ([FromBody]LoginDto loginDto,IAdministradorServico administradorServico) =>
 {
     if (administradorServico.Login(loginDto)!= null)
     {
@@ -27,5 +34,23 @@ app.MapPost("/login", ([FromBody]LoginDto loginDto,IAdministradorServico adminis
 
     return Results.Unauthorized();
 });
+app.MapPost("/veiculos", ([ FromBody]VeiculoDto veiculoDto,IVeiculoServico veiculoServico) =>
+{
+    var veiculo = new Veiculo
+    {
+        Nome = veiculoDto.Nome,
+        Marca = veiculoDto.Marca,
+        Ano = veiculoDto.Ano, 
+        
+    };
+    veiculoServico.Incluir(veiculo);
+    return Results.Created($"/veiculo/{veiculo.Id}",veiculo);
+
+});  
+
+
+
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.Run();
